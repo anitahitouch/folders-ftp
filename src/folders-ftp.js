@@ -6,6 +6,12 @@
 
 var uriParse = require('url');
 var jsftp = require('jsftp');
+
+/* For testing only : 
+ * Using as a file System
+ * provider
+ */
+var Fio = require('folders')
 // var rush = require('node-rush');
 
 var FoldersFtp = function(prefix,options) {
@@ -19,7 +25,8 @@ var FoldersFtp = function(prefix,options) {
 		var conn = parseConnString(this.connectionString);
 		var Server = require('./embedded-ftp-server');
 		this.server = new Server(conn);
-		this.server.start();
+        // For testing only: passing local as fs provider
+		this.server.start(Fio.local());
 	}
 };
 
@@ -60,7 +67,7 @@ FoldersFtp.prototype.ls = function(path, cb) {
 	var cwd = path || "";
 
 	// NOTES: Not using connection pooling nor re-using the connection.
-	self.ftp = this.prepare();
+	self.ftp = self.prepare();
 	self.ftp.raw.cwd("." + cwd, function(err, data) {
 		if (err){
 			console.error(err);

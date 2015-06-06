@@ -19,7 +19,7 @@ Server.prototype.close = function(){
 	}
 };
 
-Server.prototype.start = function(){
+Server.prototype.start = function(provider){
 	var FTPCredentials = this.FTPCredentials;
 	console.log("start the FTP Embedded server,",FTPCredentials);
 	if (FTPCredentials.host === "localhost") {
@@ -34,10 +34,17 @@ Server.prototype.start = function(){
 			getRoot: function () {
 				// also sends conn string, may be better connect point.
 				return process.cwd();
-			}
+			},
+			useReadFile:false,
+			useWriteFile:false
 		});
 
-		var mock = new Fio.fs(new Fio.stub());
+		var FolderFs = Fio.fs()
+		//var provider = Fio.local()
+		var folderfs  = new FolderFs(new provider());
+		
+		/*
+		//redundant code.We can delete this 
 		mock.readdir = function(path, cb) {
 			console.log('read', dir);
 		};
@@ -48,6 +55,7 @@ Server.prototype.start = function(){
 			console.log('stat', dir);
 			cb(null, stat);
 		};
+		*/
 
 		server.on('client:connected', function(conn) {
 			var username;
@@ -58,7 +66,7 @@ Server.prototype.start = function(){
 				// failure();
 			});
 			conn.on('command:pass', function(pass, success, failure) {
-				success(username, mock);
+				success(username, folderfs);
 				// failure();
 			});
 		});
